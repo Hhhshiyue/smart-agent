@@ -1,0 +1,40 @@
+{
+  "name": "smart-agent",
+  "version": "1.0.0",
+  "description": "智能任务助手 Agent - 一个能自主完成复杂任务的智能体系统",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
+    "dev": "nodemon app.js",
+    "test": "node tests/run-all-tests.js",
+    "test:vector": "node tests/vector-store.test.js",
+    "test:math": "node tests/math-parser.test.js",
+    "test:agent": "node tests/agent-tool-mode.test.js",
+    "test:old": "node tests/validator.test.js && node tests/vectors.test.js",
+    "test:validator": "node tests/validator.test.js",
+    "test:vectors": "node tests/vectors.test.js"
+  },
+  "keywords": [
+    "agent",
+    "ai",
+    "llm",
+    "automation",
+    "task-runner"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^1.6.0",
+    "cheerio": "^1.0.0-rc.12",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "jsonwebtoken": "^9.0.3"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}

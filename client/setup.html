@@ -1,0 +1,890 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smart Agent - 安装配置向导</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 40px 20px;
+    }
+
+    .container {
+      max-width: 860px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      padding: 40px;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .header .logo {
+      width: 64px;
+      height: 64px;
+      border-radius: 16px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 30px;
+      font-weight: 700;
+      margin-bottom: 16px;
+    }
+
+    .header h1 {
+      font-size: 26px;
+      color: #333;
+      margin-bottom: 8px;
+    }
+
+    .header p {
+      color: #888;
+      font-size: 14px;
+    }
+
+    /* 步骤指示器 */
+    .steps {
+      display: flex;
+      justify-content: center;
+      gap: 0;
+      margin-bottom: 36px;
+    }
+
+    .step-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0 16px;
+    }
+
+    .step-circle {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: #e8e8e8;
+      color: #999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 15px;
+      transition: all 0.3s;
+    }
+
+    .step-item.active .step-circle {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+
+    .step-item.done .step-circle {
+      background: #4caf50;
+      color: white;
+    }
+
+    .step-label {
+      font-size: 13px;
+      color: #999;
+      font-weight: 500;
+    }
+
+    .step-item.active .step-label {
+      color: #667eea;
+    }
+
+    .step-divider {
+      width: 50px;
+      height: 2px;
+      background: #e8e8e8;
+    }
+
+    .step-divider.done {
+      background: #4caf50;
+    }
+
+    /* 面板 */
+    .panel {
+      display: none;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .panel.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .panel-title {
+      font-size: 18px;
+      color: #333;
+      margin-bottom: 6px;
+    }
+
+    .panel-desc {
+      color: #888;
+      font-size: 14px;
+      margin-bottom: 24px;
+    }
+
+    /* 提供商卡片网格 */
+    .provider-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 14px;
+    }
+
+    .provider-card {
+      border: 2px solid #e8e8e8;
+      border-radius: 14px;
+      padding: 18px;
+      cursor: pointer;
+      transition: all 0.2s;
+      position: relative;
+      background: white;
+    }
+
+    .provider-card:hover {
+      border-color: #a9b3f5;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(102, 126, 234, 0.15);
+    }
+
+    .provider-card.selected {
+      border-color: #667eea;
+      background: #f5f6ff;
+      box-shadow: 0 8px 24px rgba(102, 126, 234, 0.2);
+    }
+
+    .provider-card.selected::after {
+      content: '✓';
+      position: absolute;
+      top: 10px;
+      right: 12px;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: #667eea;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .provider-name {
+      font-size: 15px;
+      font-weight: 700;
+      color: #333;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .badge {
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 20px;
+      font-weight: 600;
+    }
+
+    .badge-free {
+      background: #e8f5e9;
+      color: #2e7d32;
+    }
+
+    .badge-local {
+      background: #e3f2fd;
+      color: #1565c0;
+    }
+
+    .provider-desc {
+      font-size: 12.5px;
+      color: #777;
+      line-height: 1.5;
+    }
+
+    /* 表单 */
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: #555;
+      margin-bottom: 8px;
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 12px 14px;
+      border: 2px solid #e0e0e0;
+      border-radius: 10px;
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.2s;
+      font-family: inherit;
+    }
+
+    .form-control:focus {
+      border-color: #667eea;
+    }
+
+    select.form-control {
+      cursor: pointer;
+      appearance: none;
+      background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23999' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      background-size: 16px;
+    }
+
+    /* 密钥输入框 */
+    .key-input-wrap {
+      position: relative;
+    }
+
+    .key-input-wrap .toggle-eye {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: #999;
+      font-size: 16px;
+      padding: 4px;
+    }
+
+    .key-input-wrap .toggle-eye:hover {
+      color: #667eea;
+    }
+
+    /* 官网链接按钮 */
+    .site-link-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 18px;
+      background: #f5f6ff;
+      color: #667eea;
+      border: 2px solid #667eea;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.2s;
+      margin-bottom: 16px;
+    }
+
+    .site-link-btn:hover {
+      background: #667eea;
+      color: white;
+    }
+
+    .site-link-btn .link-icon {
+      font-size: 16px;
+    }
+
+    /* 提示条 */
+    .info-box {
+      background: #f5f6ff;
+      border-left: 4px solid #667eea;
+      border-radius: 8px;
+      padding: 12px 16px;
+      font-size: 13px;
+      color: #555;
+      margin-bottom: 20px;
+      line-height: 1.6;
+    }
+
+    .error-box {
+      background: #fdecea;
+      border-left: 4px solid #f44336;
+      border-radius: 8px;
+      padding: 12px 16px;
+      font-size: 13px;
+      color: #d32f2f;
+      margin-bottom: 20px;
+      display: none;
+      line-height: 1.6;
+    }
+
+    .success-box {
+      background: #e8f5e9;
+      border-left: 4px solid #4caf50;
+      border-radius: 8px;
+      padding: 12px 16px;
+      font-size: 13px;
+      color: #2e7d32;
+      margin-bottom: 20px;
+      display: none;
+      line-height: 1.6;
+    }
+
+    /* 按钮 */
+    .btn-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 24px;
+    }
+
+    .btn {
+      padding: 12px 28px;
+      border: none;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      opacity: 0.9;
+      transform: translateY(-1px);
+    }
+
+    .btn-primary:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .btn-secondary {
+      background: #f0f0f0;
+      color: #666;
+    }
+
+    .btn-secondary:hover {
+      background: #e0e0e0;
+    }
+
+    .btn-success {
+      background: #4caf50;
+      color: white;
+    }
+
+    .btn-success:hover {
+      background: #43a047;
+    }
+
+    .btn-test {
+      background: white;
+      color: #667eea;
+      border: 2px solid #667eea;
+      margin-top: 12px;
+    }
+
+    .btn-test:hover {
+      background: #f5f6ff;
+    }
+
+    /* 加载状态 */
+    .loading {
+      text-align: center;
+      color: #999;
+      padding: 60px 0;
+      font-size: 14px;
+    }
+
+    .spinner {
+      display: inline-block;
+      width: 28px;
+      height: 28px;
+      border: 3px solid #e8e8e8;
+      border-top-color: #667eea;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin-bottom: 12px;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* 完成页 */
+    .done-page {
+      text-align: center;
+      padding: 30px 0;
+    }
+
+    .done-icon {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: #e8f5e9;
+      color: #4caf50;
+      font-size: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 20px;
+    }
+
+    .done-page h2 {
+      color: #333;
+      margin-bottom: 10px;
+    }
+
+    .done-page p {
+      color: #777;
+      margin-bottom: 30px;
+    }
+
+    .done-summary {
+      background: #f8f9ff;
+      border-radius: 12px;
+      padding: 16px;
+      margin: 0 auto 30px;
+      max-width: 420px;
+      font-size: 14px;
+      color: #555;
+      text-align: left;
+    }
+
+    .done-summary div {
+      padding: 6px 0;
+    }
+
+    .done-summary .label {
+      color: #999;
+      display: inline-block;
+      width: 90px;
+    }
+
+    /* 已配置状态 */
+    .already-configured {
+      text-align: center;
+      padding: 30px 0;
+    }
+
+    .already-configured h2 {
+      color: #333;
+      margin-bottom: 12px;
+    }
+
+    .already-configured p {
+      color: #777;
+      margin-bottom: 24px;
+    }
+
+    .tag {
+      display: inline-block;
+      background: #e8f5e9;
+      color: #2e7d32;
+      font-size: 13px;
+      font-weight: 600;
+      padding: 6px 16px;
+      border-radius: 20px;
+      margin-bottom: 24px;
+    }
+
+    @media (max-width: 600px) {
+      .container { padding: 24px 18px; }
+      .step-divider { width: 20px; }
+      .provider-grid { grid-template-columns: 1fr; }
+      .btn-row { flex-direction: column; }
+      .btn-row .btn { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="logo">SA</div>
+      <h1>欢迎使用 Smart Agent</h1>
+      <p>只需 3 步，配置 AI 模型即可开始使用智能体</p>
+    </div>
+
+    <!-- 步骤指示器 -->
+    <div class="steps">
+      <div class="step-item active" id="step-ind-1">
+        <div class="step-circle">1</div>
+        <div class="step-label">选择模型</div>
+      </div>
+      <div class="step-divider" id="step-div-1"></div>
+      <div class="step-item" id="step-ind-2">
+        <div class="step-circle">2</div>
+        <div class="step-label">创建密钥</div>
+      </div>
+      <div class="step-divider" id="step-div-2"></div>
+      <div class="step-item" id="step-ind-3">
+        <div class="step-circle">3</div>
+        <div class="step-label">测试使用</div>
+      </div>
+    </div>
+
+    <div id="loading" class="loading">
+      <div class="spinner"></div>
+      <div>正在加载模型列表...</div>
+    </div>
+
+    <!-- 步骤1：选择模型 -->
+    <div class="panel" id="panel-1">
+      <h2 class="panel-title">选择你的 AI 模型</h2>
+      <p class="panel-desc">根据你的需求选择一个 AI 服务提供商，选好后点击"下一步"</p>
+      <div class="provider-grid" id="provider-grid"></div>
+      <div class="btn-row">
+        <div></div>
+        <button class="btn btn-primary" id="btn-next-1" disabled>下一步</button>
+      </div>
+    </div>
+
+    <!-- 步骤2：创建密钥并填写 -->
+    <div class="panel" id="panel-2">
+      <h2 class="panel-title">创建并填写 API Key</h2>
+      <p class="panel-desc">前往所选服务商的官网创建密钥，然后粘贴到下方</p>
+
+      <div class="info-box" id="site-info">
+        第一步：点击下方按钮前往 <strong id="provider-name-2"></strong> 官网，注册/登录后创建你的 API Key。
+      </div>
+
+      <a class="site-link-btn" id="site-link" href="#" target="_blank" rel="noopener">
+        <span class="link-icon">🔗</span>
+        <span id="site-link-text">前往官网创建 API Key</span>
+      </a>
+
+      <div id="key-section">
+        <div class="form-group">
+          <label for="model-select">选择具体模型</label>
+          <select class="form-control" id="model-select"></select>
+        </div>
+        <div class="form-group">
+          <label for="api-key">API Key <span id="key-required" style="color:#f44336">*</span></label>
+          <div class="key-input-wrap">
+            <input type="password" class="form-control" id="api-key" placeholder="粘贴你的 API Key，如 sk-xxxxxx">
+            <button class="toggle-eye" id="toggle-eye" type="button">👁</button>
+          </div>
+        </div>
+        <button class="btn btn-test" id="btn-test">测试连接</button>
+      </div>
+
+      <div class="form-group" id="pwd-section">
+        <label for="login-password">设置登录密码（可选）</label>
+        <div class="key-input-wrap">
+          <input type="password" class="form-control" id="login-password" placeholder="至少 4 位，留空则使用默认密码 admin123">
+        </div>
+        <div class="info-box" style="margin-top:8px;background:#fff8e1;border-left-color:#f9a825">
+          登录账号为 <strong>admin</strong>。建议设置你自己的密码，避免他人使用默认密码登录。
+        </div>
+      </div>
+
+      <div class="error-box" id="error-box"></div>
+      <div class="success-box" id="success-box"></div>
+
+      <div class="btn-row">
+        <button class="btn btn-secondary" id="btn-back-1">上一步</button>
+        <button class="btn btn-primary" id="btn-next-2" disabled>下一步</button>
+      </div>
+    </div>
+
+    <!-- 步骤3：完成 -->
+    <div class="panel" id="panel-3">
+      <div class="done-page" id="done-page">
+        <div class="done-icon">✓</div>
+        <h2>配置完成！</h2>
+        <p>你的 AI 智能体已经可以使用了</p>
+        <div class="done-summary">
+          <div><span class="label">模型服务</span><span id="done-provider"></span></div>
+          <div><span class="label">使用模型</span><span id="done-model"></span></div>
+        </div>
+        <button class="btn btn-success" id="btn-start">开始使用智能体 →</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // 全局状态
+    let providers = [];
+    let selectedProvider = null;
+    let testResult = null;
+
+    const $ = id => document.getElementById(id);
+
+    // ===== 初始化 =====
+    async function init() {
+      // 重新配置：先清除本地配置
+      const urlParams = new URLSearchParams(location.search);
+      if (urlParams.get('reconfig') === '1') {
+        try { await fetch('/api/setup/reset', { method: 'POST' }); } catch (e) { /* 忽略 */ }
+      }
+
+      try {
+        const statusRes = await fetch('/api/setup/status').then(r => r.json());
+        // 仅当由本地向导配置过才显示"已配置"页（环境变量预配置不拦截）
+        if (statusRes.success && statusRes.data.configured && statusRes.data.fromLocal) {
+          renderAlreadyConfigured(statusRes.data.current);
+          return;
+        }
+      } catch (e) { /* 忽略，继续加载 */ }
+
+      try {
+        const res = await fetch('/api/setup/providers').then(r => r.json());
+        if (res.success) {
+          providers = res.data.providers;
+          renderProviders();
+        } else {
+          showError(res.error || '加载模型列表失败');
+        }
+      } catch (e) {
+        showError('无法连接服务器，请确认服务已启动');
+      } finally {
+        $('loading').style.display = 'none';
+        $('panel-1').classList.add('active');
+      }
+    }
+
+    // ===== 已配置状态 =====
+    function renderAlreadyConfigured(current) {
+      $('loading').style.display = 'none';
+      $('steps').style.display = 'none';
+      $('panel-1').innerHTML = '';
+      const box = document.createElement('div');
+      box.className = 'already-configured';
+      box.innerHTML = `
+        <h2>AI 智能体已配置完成</h2>
+        <span class="tag">✓ 当前使用：${escapeHtml(current.provider || '')} / ${escapeHtml(current.model || '')}</span>
+        <p>你可以直接开始使用，也可以更换其他 AI 模型。</p>
+        <div class="btn-row" style="justify-content:center">
+          <button class="btn btn-success" id="btn-go-start">开始使用 →</button>
+          <button class="btn btn-secondary" id="btn-reconfig">重新配置</button>
+        </div>
+      `;
+      $('panel-1').appendChild(box);
+      $('panel-1').classList.add('active');
+
+      $('btn-go-start').onclick = () => location.href = '/';
+      $('btn-reconfig').onclick = () => location.href = '/setup.html?reconfig=1';
+    }
+
+    // ===== 渲染提供商卡片 =====
+    function renderProviders() {
+      const grid = $('provider-grid');
+      grid.innerHTML = '';
+
+      providers.forEach(p => {
+        const card = document.createElement('div');
+        card.className = 'provider-card';
+        card.dataset.id = p.id;
+
+        const badges = [];
+        if (p.freeTier) badges.push('<span class="badge badge-free">有免费额度</span>');
+        if (p.noKey) badges.push('<span class="badge badge-local">无需密钥</span>');
+
+        card.innerHTML = `
+          <div class="provider-name">${escapeHtml(p.name)} ${badges.join(' ')}</div>
+          <div class="provider-desc">${escapeHtml(p.desc)}</div>
+        `;
+
+        card.onclick = () => selectProvider(p, card);
+        grid.appendChild(card);
+      });
+    }
+
+    function selectProvider(provider, card) {
+      selectedProvider = provider;
+      document.querySelectorAll('.provider-card').forEach(c => c.classList.remove('selected'));
+      card.classList.add('selected');
+      $('btn-next-1').disabled = false;
+    }
+
+    // ===== 步骤切换 =====
+    function goToStep(step) {
+      [1, 2, 3].forEach(i => {
+        $('panel-' + i).classList.toggle('active', i === step);
+        $('step-ind-' + i).classList.toggle('active', i === step);
+        $('step-ind-' + i).classList.toggle('done', i < step);
+        const divider = $('step-div-' + i);
+        if (divider) divider.classList.toggle('done', i < step);
+      });
+    }
+
+    // ===== 步骤2逻辑 =====
+    function setupStep2() {
+      $('provider-name-2').textContent = selectedProvider.name;
+      $('site-link').href = selectedProvider.signupUrl;
+
+      // 模型下拉
+      const select = $('model-select');
+      select.innerHTML = '';
+      selectedProvider.models.forEach(m => {
+        const opt = document.createElement('option');
+        opt.value = m;
+        opt.textContent = m;
+        if (m === selectedProvider.defaultModel) opt.selected = true;
+        select.appendChild(opt);
+      });
+
+      // 无密钥提供商（Ollama）隐藏密钥输入
+      if (selectedProvider.noKey) {
+        $('key-section').style.display = 'none';
+        $('key-required').textContent = '';
+        $('site-link-text').textContent = '前往官网下载安装 Ollama';
+      } else {
+        $('key-section').style.display = 'block';
+        $('key-required').textContent = '*';
+        $('site-link-text').textContent = '前往官网创建 API Key';
+        $('api-key').value = '';
+        $('api-key').type = 'password';
+      }
+
+      $('error-box').style.display = 'none';
+      $('success-box').style.display = 'none';
+      $('btn-next-2').disabled = true;
+      testResult = null;
+    }
+
+    // 显示/隐藏密钥
+    $('toggle-eye').onclick = () => {
+      const input = $('api-key');
+      const isPassword = input.type === 'password';
+      input.type = isPassword ? 'text' : 'password';
+      $('toggle-eye').textContent = isPassword ? '🙈' : '👁';
+    };
+
+    // 测试连接
+    $('btn-test').onclick = async () => {
+      const apiKey = $('api-key').value.trim();
+      if (!selectedProvider.noKey && !apiKey) {
+        showError('请先输入 API Key');
+        return;
+      }
+
+      const btn = $('btn-test');
+      btn.disabled = true;
+      btn.textContent = '测试中...';
+      hideError();
+
+      try {
+        const res = await fetch('/api/setup/test', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            provider: selectedProvider.id,
+            apiKey: apiKey,
+            model: $('model-select').value
+          })
+        }).then(r => r.json());
+
+        if (res.success && res.data.connected) {
+          const pwd = $('login-password').value.trim();
+          testResult = {
+            provider: selectedProvider.id,
+            apiKey: apiKey,
+            model: $('model-select').value
+          };
+          // 设置了登录密码则一并保存
+          if (pwd) testResult.password = pwd;
+          showSuccess('连接成功！耗时 ' + res.data.elapsedMs + 'ms，可以继续下一步。');
+          $('btn-next-2').disabled = false;
+        } else {
+          showError('连接失败：请检查 API Key 是否正确，或稍后重试。');
+          $('btn-next-2').disabled = true;
+        }
+      } catch (e) {
+        showError('连接失败：无法访问服务，请检查网络。');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = '测试连接';
+      }
+    };
+
+    // ===== 完成 =====
+    async function completeSetup() {
+      if (!testResult) return;
+
+      const btn = $('btn-start');
+      btn.disabled = true;
+      btn.textContent = '保存中...';
+
+      try {
+        const res = await fetch('/api/setup/configure', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(testResult)
+        }).then(r => r.json());
+
+        if (res.success) {
+          $('done-provider').textContent = selectedProvider.name;
+          $('done-model').textContent = testResult.model;
+          $('btn-start').textContent = '开始使用智能体 →';
+          $('btn-start').disabled = false;
+          // 进入完成状态
+          goToStep(3);
+        } else {
+          showError(res.error || '保存配置失败');
+          btn.disabled = false;
+          btn.textContent = '开始使用智能体 →';
+        }
+      } catch (e) {
+        showError('保存配置失败：' + e.message);
+        btn.disabled = false;
+        btn.textContent = '开始使用智能体 →';
+      }
+    }
+
+    // ===== 辅助函数 =====
+    function showError(msg) {
+      const box = $('error-box');
+      box.textContent = msg;
+      box.style.display = 'block';
+      $('success-box').style.display = 'none';
+    }
+
+    function hideError() {
+      $('error-box').style.display = 'none';
+    }
+
+    function showSuccess(msg) {
+      const box = $('success-box');
+      box.textContent = msg;
+      box.style.display = 'block';
+      $('error-box').style.display = 'none';
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    // ===== 事件绑定 =====
+    $('btn-next-1').onclick = () => { setupStep2(); goToStep(2); };
+    $('btn-back-1').onclick = () => goToStep(1);
+    $('btn-next-2').onclick = () => completeSetup();
+    $('btn-start').onclick = () => location.href = '/';
+
+    init();
+  </script>
+</body>
+</html>
